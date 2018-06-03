@@ -21,41 +21,6 @@ style.use("ggplot");
 f = Figure(figsize=(5,5), dpi=100)
 a = f.add_subplot(111)
 
-try:
-	companies = open("companies.txt", mode='r').readlines()
-	for line in companies:
-		companies[companies.index(line)] = line.replace('\n','')
-except Exception as e:
-	raise
-
-def animate(company):
-	path = company+".csv"
-	lines = open(path, mode='r').readlines()
-
-	data = []
-	lines.pop(0)
-
-	for l in lines:
-		date = datetime.strptime(l.replace('\n','').split(',')[0],'%m/%d/%Y')
-		value = float(l.replace('\n','').split(',')[1])
-
-		data.append([date,value])
-
-	xlist = []
-	ylist = []
-
-	for point in data:
-		xlist.append(point[0])
-		ylist.append(point[1])
-
-	#plt.title('Stock Indicator')
-	#plt.ylabel('Stock Price')
-	#plt.xlabel('Date and Time')
-
-	a.clear()
-	a.plot(xlist, ylist)
-
-
 class StockPriceApp(Tk.Tk):
 	def __init__(self, *args, **kwargs):
 		Tk.Tk.__init__(self, *args, **kwargs)
@@ -84,18 +49,59 @@ class StartPage(Tk.Frame):
 		Tk.Frame.__init__(self,parent)
 		label = Tk.Label(self, text = "Choose Which StockTrend to Follow", font = LARGE_FONT)
 		label.pack(pady = 10,padx = 10)
+		graphs = []
 
-		for company in getCompanies():
-			button = Tk.Button(self, text=company,command = lambda: showGraph(company))
-			button.pack()
+		ZESAbtn = Tk.Button(self, text="ZESA",command = lambda: showZESA())
+		ZESAbtn.pack()
 
-def showGraph(company):
+		AFDISbtn = Tk.Button(self, text="AFDIS",command = lambda: showAFDIS())
+		AFDISbtn.pack()
+
+def showZESA():
+	print("Graph for ZESA")
 	lines = None
 	try:
-	    file = open(company+'.csv', mode='r')
+	    file = open('ZESA.csv', mode='r')
+	    print("Opening file for")
 	    lines = file.readlines()
 	except Exception as e:
-	    print('Failed to load %s :\n %s' % (company,e))
+	    print('Failed to load')
+	else:
+		print("Dataset successfully loaded for")
+
+	data = []
+	lines.pop(0)
+
+	for l in lines:
+	    date = datetime.strptime(l.replace('\n','').split(',')[0],'%m/%d/%Y')
+	    value = float(l.replace('\n','').split(',')[1])
+
+	    data.append([date,value])
+
+	style.use('ggplot')
+
+	x = []
+	y = []
+
+	for point in data:
+		x.append(point[0])
+		y.append(point[1])
+
+	plt.title('ZESA Stock Indicator')
+	plt.ylabel('Stock Price')
+	plt.xlabel('Date and Time')
+	plt.plot(x,y)
+	plt.show()
+
+def showAFDIS():
+	print("Graph for AFDIS")
+	lines = None
+	try:
+	    file = open('AFDIS.csv', mode='r')
+	    print("Opening file for AFDIS")
+	    lines = file.readlines()
+	except Exception as e:
+	    print('Failed to load company data file')
 	else:
 		print("Dataset successfully loaded")
 
@@ -117,25 +123,11 @@ def showGraph(company):
 		x.append(point[0])
 		y.append(point[1])
 
-	plt.title(company + 'Stock Indicator')
+	plt.title('AFDIS Stock Indicator')
 	plt.ylabel('Stock Price')
 	plt.xlabel('Date and Time')
-
 	plt.plot(x,y)
 	plt.show()
-
-def getCompanies():
-	companies = None
-	try:
-		companies = open('companies.txt',mode='r').readlines()
-	except Exception as e:
-		raise
-
-	companyList = []
-	for c in companies:
-		companyList.append(c.replace('\n',''))
-
-	return companyList
 
 app = StockPriceApp()
 app.mainloop()
